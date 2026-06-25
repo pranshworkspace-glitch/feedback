@@ -1,0 +1,1364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>NSS Shipping — Forms & Feedback</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js" crossorigin></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+:root{
+  --ink:#0B1F33; --ink2:#13314A; --ink3:#1E4663; --ink-line:#26506E;
+  --paper:#F5F0E4; --paper2:#FBF8F0; --line:#DBD1BD; --line2:#E8E0CF;
+  --brass:#E0A03A; --brass-d:#C2842A;
+  --good:#2E7D6B; --good2:#5C9E64; --mid:#C68A1E; --warn:#D07A2A; --bad:#B14228;
+  --t-dark:#10212F; --t-soft:#5E6E76; --t-mute:#8A97A0;
+  --t-on:#EAF0F4; --t-on-soft:#9DB4C4;
+  --display:'Fraunces',Georgia,serif; --ui:'Inter',system-ui,sans-serif; --mono:'IBM Plex Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box;}
+body{margin:0;background:#E7E0D0;font-family:var(--ui);color:var(--t-dark);line-height:1.5;-webkit-font-smoothing:antialiased;}
+.wrap{max-width:1140px;margin:0 auto;padding:20px 16px;}
+.shell{background:var(--paper);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:0 18px 50px -28px rgba(11,31,51,.5);}
+.head{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--ink);color:var(--t-on);padding:14px 20px;flex-wrap:wrap;}
+.brand{display:flex;align-items:center;gap:12px;}
+.brand img{width:40px;height:40px;border-radius:9px;background:#fff;padding:3px;object-fit:contain;}
+.brand b{font-family:var(--display);font-weight:600;font-size:16px;display:block;}
+.brand span{font-size:11px;color:var(--t-on-soft);letter-spacing:.1em;text-transform:uppercase;}
+.head-r{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.badge{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:var(--brass);background:rgba(224,160,58,.12);padding:5px 10px;border-radius:20px;border:1px solid rgba(224,160,58,.3);}
+.ghost{background:transparent;color:var(--t-on-soft);border:1px solid var(--ink-line);padding:6px 11px;border-radius:8px;font-size:12px;cursor:pointer;}
+.ghost:hover{color:var(--t-on);border-color:var(--brass);}
+.body{display:flex;min-height:460px;}
+.nav{flex:none;width:210px;background:var(--paper2);border-right:1px solid var(--line);padding:16px 12px;}
+.nav button{display:flex;align-items:center;gap:9px;width:100%;text-align:left;background:none;border:0;padding:10px 12px;border-radius:9px;font-size:14px;color:var(--t-soft);cursor:pointer;font-family:var(--ui);margin-bottom:3px;}
+.nav button:hover{background:#fff;color:var(--ink);}
+.nav button.on{background:var(--ink);color:#fff;font-weight:600;}
+.nav button.on .dot{background:var(--brass);}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--line);flex:none;}
+.main{flex:1;padding:26px 28px;min-width:0;}
+.eyebrow{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--brass-d);font-weight:600;margin-bottom:8px;}
+h1.t{font-family:var(--display);font-size:26px;font-weight:600;margin:0 0 6px;color:var(--ink);}
+h2.t{font-family:var(--display);font-size:17px;font-weight:600;margin:0 0 12px;color:var(--ink);}
+.lead{color:var(--t-soft);font-size:14px;margin:0 0 20px;max-width:60ch;}
+.muted{color:var(--t-mute);font-size:13px;}
+.card{background:var(--paper2);border:1px solid var(--line);border-radius:12px;padding:24px;position:relative;}
+.narrow{max-width:440px;margin:24px auto;}
+.center{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:60px 0;color:var(--t-mute);}
+.spin{width:32px;height:32px;border:3px solid var(--line);border-top-color:var(--brass);border-radius:50%;animation:sp 1s linear infinite;}
+@keyframes sp{to{transform:rotate(360deg);}}
+.field{display:block;margin-bottom:15px;}
+.flabel{display:block;font-size:12.5px;font-weight:600;color:var(--t-soft);margin-bottom:6px;}
+.req{color:var(--bad);}
+.input{width:100%;background:#fff;border:1px solid var(--line);border-radius:9px;padding:11px 13px;font-size:14px;font-family:var(--ui);color:var(--t-dark);}
+.input:focus{outline:none;border-color:var(--brass);box-shadow:0 0 0 3px rgba(224,160,58,.18);}
+textarea.input{resize:vertical;line-height:1.5;}
+.primary{background:var(--ink);color:#fff;border:0;padding:12px 18px;border-radius:9px;font-size:15px;font-weight:600;cursor:pointer;font-family:var(--ui);}
+.primary:hover{background:var(--ink2);}
+.primary:disabled{opacity:.55;cursor:not-allowed;}
+.sec{display:inline-flex;align-items:center;gap:6px;background:#fff;color:var(--ink);border:1px solid var(--line);padding:10px 15px;border-radius:9px;font-size:13.5px;font-weight:600;cursor:pointer;font-family:var(--ui);}
+.sec:hover{border-color:var(--brass);}
+.sec:disabled{opacity:.5;cursor:not-allowed;}
+.linkbtn{background:none;border:0;color:var(--t-soft);cursor:pointer;font-size:13px;text-decoration:underline;text-underline-offset:3px;font-family:var(--ui);}
+.err{display:flex;gap:7px;color:var(--bad);font-size:13px;margin:4px 0 12px;background:rgba(177,66,40,.07);padding:9px 12px;border-radius:8px;border:1px solid rgba(177,66,40,.2);}
+.ok{color:var(--good);font-size:13px;margin:4px 0 12px;background:rgba(46,125,107,.08);padding:9px 12px;border-radius:8px;border:1px solid rgba(46,125,107,.25);}
+.note{font-size:12.5px;color:var(--t-mute);margin-top:10px;}
+/* form rendering */
+.fhead{display:flex;align-items:center;gap:14px;border-bottom:2px solid var(--ink);padding-bottom:14px;margin-bottom:6px;}
+.fhead img{width:54px;height:54px;object-fit:contain;background:#fff;border-radius:8px;padding:3px;}
+.fhead .org{font-family:var(--display);font-weight:600;font-size:15px;color:var(--ink);}
+.fhead .ti{font-size:13px;color:var(--t-soft);letter-spacing:.04em;}
+.ffoot{margin-top:18px;padding-top:12px;border-top:1px solid var(--line);font-family:var(--mono);font-size:11px;color:var(--t-mute);}
+.intro{font-size:13px;color:var(--t-soft);background:#fff;border:1px dashed var(--line);border-radius:8px;padding:10px 12px;margin:14px 0;}
+.section{margin-top:22px;}
+.section h3{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--brass-d);font-weight:600;border-bottom:1px solid var(--line);padding-bottom:6px;margin:0 0 14px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 18px;}
+.qrow{margin-bottom:16px;}
+.qrow .ql{font-size:14px;margin-bottom:8px;display:flex;gap:8px;}
+.qn{font-family:var(--mono);font-size:12px;color:var(--brass-d);flex:none;}
+.rating{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;max-width:420px;}
+.chip{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;border:1px solid var(--line);border-radius:9px;background:#fff;cursor:pointer;font-family:var(--ui);}
+.chip:hover{border-color:var(--brass);}
+.chip.on{background:var(--ink);border-color:var(--ink);}
+.chip .n{font-family:var(--mono);font-size:15px;color:var(--ink);}
+.chip.on .n{color:var(--brass);}
+.chip .w{font-size:9px;letter-spacing:.02em;color:var(--t-mute);text-transform:uppercase;text-align:center;}
+.chip.on .w{color:var(--t-on-soft);}
+.rubric{font-size:12px;color:var(--t-soft);margin-top:6px;min-height:16px;font-style:italic;}
+.yn{display:inline-flex;gap:8px;}
+.yn button{padding:8px 20px;border:1px solid var(--line);background:#fff;border-radius:9px;cursor:pointer;font-size:14px;font-family:var(--ui);font-weight:600;color:var(--t-soft);}
+.yn button.yes.on{background:var(--good);border-color:var(--good);color:#fff;}
+.yn button.no.on{background:var(--bad);border-color:var(--bad);color:#fff;}
+/* dashboard */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px;}
+.stat{background:var(--ink);color:#fff;border-radius:11px;padding:15px 16px;}
+.stat .l{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--t-on-soft);}
+.stat .v{font-family:var(--display);font-size:28px;font-weight:600;line-height:1.1;margin-top:4px;}
+.panel{background:var(--paper2);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:16px;}
+.gauge{margin-bottom:13px;}
+.gauge .gh{display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;gap:10px;}
+.gv{font-family:var(--mono);flex:none;}
+.track{height:8px;background:var(--line2);border-radius:5px;overflow:hidden;}
+.fill{height:100%;border-radius:5px;}
+.tbl{border:1px solid var(--line2);border-radius:10px;overflow:hidden;font-size:13.5px;}
+.trow{display:grid;gap:10px;align-items:center;padding:10px 14px;}
+.th{background:var(--ink);color:var(--t-on-soft);font-size:11px;letter-spacing:.06em;text-transform:uppercase;}
+.td{background:#fff;border-top:1px solid var(--line2);cursor:pointer;width:100%;text-align:left;border-left:0;border-right:0;border-bottom:0;font-family:var(--ui);}
+.td:hover{background:var(--paper2);}
+.detail{background:var(--paper2);border-top:1px solid var(--line2);padding:14px 16px;font-size:13px;}
+.detail .dr{display:grid;grid-template-columns:1fr auto;gap:10px;padding:5px 0;border-bottom:1px dashed var(--line);}
+.pill{color:#fff;font-size:11px;font-weight:600;padding:2px 9px;border-radius:20px;}
+.formlist{display:flex;flex-direction:column;gap:10px;}
+.formcard{display:flex;justify-content:space-between;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:11px;padding:15px 17px;cursor:pointer;text-align:left;width:100%;font-family:var(--ui);}
+.formcard:hover{border-color:var(--brass);}
+.formcard .fc-t{font-family:var(--display);font-size:15px;font-weight:600;color:var(--ink);}
+.formcard .fc-s{font-size:12px;color:var(--t-mute);margin-top:2px;}
+.tag{font-size:10.5px;text-transform:uppercase;letter-spacing:.05em;padding:3px 8px;border-radius:5px;background:var(--line2);color:var(--t-soft);font-weight:600;}
+.copybox{display:flex;gap:8px;margin-top:10px;}
+.copybox input{flex:1;font-family:var(--mono);font-size:12px;}
+@media(max-width:760px){.body{flex-direction:column;}.nav{width:auto;display:flex;gap:6px;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line);}.nav button{white-space:nowrap;margin:0;}.grid2{grid-template-columns:1fr;}.main{padding:20px 16px;}}
+
+.ugrid{display:grid;grid-template-columns:1.5fr 1fr 1fr auto;gap:10px;align-items:end;}
+@media(max-width:760px){.ugrid{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const {
+  useState,
+  useEffect,
+  useMemo
+} = React;
+const SUPABASE_URL = "https://mnhzhropoaqzungxqlnf.supabase.co";
+const SUPABASE_KEY = "sb_publishable_b5osDYMSZAobCF-nZHmCSw_52F4qtxi";
+const LOGO = "data:image/jpeg;base64,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";
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const RW = {
+  1: "Poor",
+  2: "Satisfactory",
+  3: "Good",
+  4: "Very good",
+  5: "Excellent"
+};
+const rc = v => v >= 4.5 ? "var(--good)" : v >= 3.5 ? "var(--good2)" : v >= 2.5 ? "var(--mid)" : v >= 1.5 ? "var(--warn)" : "var(--bad)";
+
+/* ---------------- field input ---------------- */
+function FieldInput({
+  f,
+  value,
+  onChange
+}) {
+  const t = f.field_type;
+  if (t === "rating5") {
+    const rub = f.rubric || {};
+    return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+      className: "rating"
+    }, [1, 2, 3, 4, 5].map(n => /*#__PURE__*/React.createElement("button", {
+      key: n,
+      type: "button",
+      className: "chip" + (value === n ? " on" : ""),
+      onClick: () => onChange(n),
+      title: rub[n] || RW[n]
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "n"
+    }, n), /*#__PURE__*/React.createElement("span", {
+      className: "w"
+    }, RW[n])))), /*#__PURE__*/React.createElement("div", {
+      className: "rubric"
+    }, value && rub[value] ? rub[value] : ""));
+  }
+  if (t === "yesno") return /*#__PURE__*/React.createElement("div", {
+    className: "yn"
+  }, /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "yes" + (value === "yes" ? " on" : ""),
+    onClick: () => onChange("yes")
+  }, "Yes"), /*#__PURE__*/React.createElement("button", {
+    type: "button",
+    className: "no" + (value === "no" ? " on" : ""),
+    onClick: () => onChange("no")
+  }, "No"));
+  if (t === "textarea") return /*#__PURE__*/React.createElement("textarea", {
+    className: "input",
+    rows: 3,
+    value: value || "",
+    onChange: e => onChange(e.target.value)
+  });
+  if (t === "date") return /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    type: "date",
+    value: value || "",
+    onChange: e => onChange(e.target.value)
+  });
+  if (t === "number") return /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    type: "number",
+    value: value || "",
+    onChange: e => onChange(e.target.value)
+  });
+  if (t === "select") return /*#__PURE__*/React.createElement("select", {
+    className: "input",
+    value: value || "",
+    onChange: e => onChange(e.target.value)
+  }, /*#__PURE__*/React.createElement("option", {
+    value: ""
+  }, "— select —"), (f.options || []).map(o => /*#__PURE__*/React.createElement("option", {
+    key: o,
+    value: o
+  }, o)));
+  return /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    value: value || "",
+    onChange: e => onChange(e.target.value)
+  });
+}
+
+/* ---------------- form renderer ---------------- */
+function FormView({
+  form,
+  fields,
+  answers,
+  setAnswers,
+  onSubmit,
+  busy,
+  err,
+  extraTop
+}) {
+  const dc = form.doc_control || {};
+  const set = k => v => setAnswers(p => ({
+    ...p,
+    [k]: v
+  }));
+  const groups = useMemo(() => {
+    const g = [];
+    let cur = null;
+    fields.forEach(f => {
+      if (!cur || cur.name !== f.section) {
+        cur = {
+          name: f.section,
+          items: []
+        };
+        g.push(cur);
+      }
+      cur.items.push(f);
+    });
+    return g;
+  }, [fields]);
+  let qn = 0;
+  return /*#__PURE__*/React.createElement("div", {
+    className: "card"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "fhead"
+  }, /*#__PURE__*/React.createElement("img", {
+    src: LOGO,
+    alt: ""
+  }), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "org"
+  }, form.header_org || "NSS Shipping Private Limited"), /*#__PURE__*/React.createElement("div", {
+    className: "ti"
+  }, form.title))), form.intro_note && /*#__PURE__*/React.createElement("div", {
+    className: "intro"
+  }, form.intro_note), extraTop, groups.map((g, gi) => /*#__PURE__*/React.createElement("div", {
+    className: "section",
+    key: gi
+  }, g.name && /*#__PURE__*/React.createElement("h3", null, g.name), /*#__PURE__*/React.createElement("div", {
+    className: g.items.every(x => ["text", "date", "number", "select"].includes(x.field_type)) ? "grid2" : ""
+  }, g.items.map(f => {
+    const rated = f.field_type === "rating5";
+    if (rated) qn++;
+    return /*#__PURE__*/React.createElement("div", {
+      className: "qrow",
+      key: f.id || f.field_key
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "ql"
+    }, rated && /*#__PURE__*/React.createElement("span", {
+      className: "qn"
+    }, qn), /*#__PURE__*/React.createElement("span", null, f.label, f.required && /*#__PURE__*/React.createElement("span", {
+      className: "req"
+    }, " *"))), /*#__PURE__*/React.createElement(FieldInput, {
+      f: f,
+      value: answers[f.field_key],
+      onChange: set(f.field_key)
+    }));
+  })))), /*#__PURE__*/React.createElement("div", {
+    className: "ffoot"
+  }, dc.footer_raw || ""), err && /*#__PURE__*/React.createElement("p", {
+    className: "err"
+  }, "⚠ ", err), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 16
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "primary",
+    disabled: busy,
+    onClick: onSubmit
+  }, busy ? "Submitting…" : "Submit")));
+}
+function validate(fields, answers) {
+  for (const f of fields) {
+    if (f.required) {
+      const v = answers[f.field_key];
+      if (v === undefined || v === null || v === "") return "Please complete: " + f.label;
+    }
+  }
+  return null;
+}
+
+/* ---------------- public one-time link flow ---------------- */
+function PublicFlow({
+  token
+}) {
+  const [state, setState] = useState("loading");
+  const [data, setData] = useState(null);
+  const [email, setEmail] = useState("");
+  const [answers, setAnswers] = useState({});
+  const [err, setErr] = useState("");
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    (async () => {
+      const {
+        data: r,
+        error
+      } = await db.rpc("get_form_for_token", {
+        p_token: token
+      });
+      if (error) {
+        setState("error");
+        setErr("Could not load this link.");
+        return;
+      }
+      if (!r || !r.ok) {
+        setState("error");
+        setErr(r && r.error === "used" ? "This link has already been used." : r && r.error === "expired" ? "This link has expired." : "This link is invalid.");
+        return;
+      }
+      setData(r);
+      setEmail(r.email || "");
+      setState("form");
+    })();
+  }, []);
+  async function submit() {
+    setErr("");
+    const v = validate(data.fields, answers);
+    if (v) return setErr(v);
+    if (email.trim().toLowerCase() !== (data.email || "").toLowerCase()) return setErr("Please enter the email address this link was sent to.");
+    setBusy(true);
+    const {
+      data: r,
+      error
+    } = await db.rpc("submit_via_link", {
+      p_token: token,
+      p_email: email.trim(),
+      p_answers: answers
+    });
+    setBusy(false);
+    if (error || !r || !r.ok) {
+      setErr(r && r.error === "used" ? "This link has already been used." : "Could not submit. Please try again.");
+      return;
+    }
+    setState("done");
+  }
+  if (state === "loading") return /*#__PURE__*/React.createElement(Shell, null, /*#__PURE__*/React.createElement("div", {
+    className: "center"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "spin"
+  }), /*#__PURE__*/React.createElement("p", null, "Loading…")));
+  if (state === "error") return /*#__PURE__*/React.createElement(Shell, null, /*#__PURE__*/React.createElement("div", {
+    className: "card narrow"
+  }, /*#__PURE__*/React.createElement("h1", {
+    className: "t"
+  }, "Link unavailable"), /*#__PURE__*/React.createElement("p", {
+    className: "err"
+  }, "⚠ ", err), /*#__PURE__*/React.createElement("p", {
+    className: "muted"
+  }, "Please contact your office for a new link.")));
+  if (state === "done") return /*#__PURE__*/React.createElement(Shell, null, /*#__PURE__*/React.createElement("div", {
+    className: "card narrow",
+    style: {
+      textAlign: "center"
+    }
+  }, /*#__PURE__*/React.createElement("h1", {
+    className: "t"
+  }, "Thank you"), /*#__PURE__*/React.createElement("p", {
+    className: "lead"
+  }, "Your response has been recorded. You may close this page.")));
+  const emailField = /*#__PURE__*/React.createElement("div", {
+    className: "field",
+    style: {
+      marginTop: 14
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "flabel"
+  }, "Confirm your email ", /*#__PURE__*/React.createElement("span", {
+    className: "req"
+  }, "*")), /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    value: email,
+    onChange: e => setEmail(e.target.value),
+    placeholder: "email this link was sent to"
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "note"
+  }, "This link was issued to a specific address and can be used once."));
+  return /*#__PURE__*/React.createElement(Shell, null, /*#__PURE__*/React.createElement(FormView, {
+    form: data.form,
+    fields: data.fields,
+    answers: answers,
+    setAnswers: setAnswers,
+    onSubmit: submit,
+    busy: busy,
+    err: err,
+    extraTop: emailField
+  }));
+}
+
+/* ---------------- shells ---------------- */
+function Shell({
+  children,
+  right
+}) {
+  return /*#__PURE__*/React.createElement("div", {
+    className: "wrap"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "shell"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "head"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "brand"
+  }, /*#__PURE__*/React.createElement("img", {
+    src: LOGO,
+    alt: ""
+  }), /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("b", null, "NSS Shipping"), /*#__PURE__*/React.createElement("span", null, "Forms & Feedback"))), /*#__PURE__*/React.createElement("div", {
+    className: "head-r"
+  }, right)), children));
+}
+
+/* ---------------- login ---------------- */
+function Login() {
+  const [step, setStep] = useState("email");
+  const [email, setEmail] = useState("");
+  const [code, setCode] = useState("");
+  const [err, setErr] = useState("");
+  const [busy, setBusy] = useState(false);
+  async function send() {
+    setErr("");
+    if (!/^\S+@\S+\.\S+$/.test(email)) return setErr("Enter a valid email.");
+    setBusy(true);
+    const {
+      error
+    } = await db.auth.signInWithOtp({
+      email: email.trim().toLowerCase(),
+      options: {
+        shouldCreateUser: true
+      }
+    });
+    setBusy(false);
+    if (error) return setErr(error.message);
+    setStep("code");
+  }
+  async function verify() {
+    setErr("");
+    if (code.trim().length < 6) return setErr("Enter the 6-digit code.");
+    setBusy(true);
+    const {
+      error
+    } = await db.auth.verifyOtp({
+      email: email.trim().toLowerCase(),
+      token: code.trim(),
+      type: "email"
+    });
+    setBusy(false);
+    if (error) return setErr("That code didn't work. Try again or resend.");
+  }
+  return /*#__PURE__*/React.createElement(Shell, null, /*#__PURE__*/React.createElement("div", {
+    className: "card narrow"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "eyebrow"
+  }, "Staff sign in"), step === "email" ? /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("h1", {
+    className: "t"
+  }, "Sign in"), /*#__PURE__*/React.createElement("p", {
+    className: "lead"
+  }, "We'll email you a 6-digit code."), /*#__PURE__*/React.createElement("div", {
+    className: "field"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "flabel"
+  }, "Email"), /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    value: email,
+    onChange: e => setEmail(e.target.value),
+    onKeyDown: e => e.key === "Enter" && send(),
+    placeholder: "you@example.com"
+  })), err && /*#__PURE__*/React.createElement("p", {
+    className: "err"
+  }, "⚠ ", err), /*#__PURE__*/React.createElement("button", {
+    className: "primary",
+    disabled: busy,
+    onClick: send
+  }, busy ? "Sending…" : "Send code")) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("h1", {
+    className: "t"
+  }, "Enter code"), /*#__PURE__*/React.createElement("p", {
+    className: "lead"
+  }, "Sent to ", /*#__PURE__*/React.createElement("b", null, email), "."), /*#__PURE__*/React.createElement("div", {
+    className: "field"
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "flabel"
+  }, "6-digit code"), /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    inputMode: "numeric",
+    value: code,
+    onChange: e => setCode(e.target.value),
+    onKeyDown: e => e.key === "Enter" && verify(),
+    placeholder: "123456"
+  })), err && /*#__PURE__*/React.createElement("p", {
+    className: "err"
+  }, "⚠ ", err), /*#__PURE__*/React.createElement("button", {
+    className: "primary",
+    disabled: busy,
+    onClick: verify
+  }, busy ? "Verifying…" : "Verify"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      marginTop: 12,
+      display: "flex",
+      gap: 14
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "linkbtn",
+    onClick: () => {
+      setStep("email");
+      setCode("");
+    }
+  }, "Change email"), /*#__PURE__*/React.createElement("button", {
+    className: "linkbtn",
+    onClick: send
+  }, "Resend")))));
+}
+
+/* ---------------- authenticated app ---------------- */
+function AppInner({
+  session
+}) {
+  const [role, setRole] = useState(null);
+  const [clientId, setClientId] = useState(null);
+  const [forms, setForms] = useState(null);
+  const [view, setView] = useState("forms");
+  const [active, setActive] = useState(null); // active form to fill
+
+  useEffect(() => {
+    (async () => {
+      const {
+        data: r
+      } = await db.rpc("my_role");
+      const {
+        data: c
+      } = await db.rpc("my_client");
+      setRole(r || "none");
+      setClientId(c || null);
+      const {
+        data: fs
+      } = await db.from("forms").select("*").order("sort_order");
+      setForms(fs || []);
+    })();
+  }, []);
+  if (role === null || forms === null) return /*#__PURE__*/React.createElement(Shell, {
+    right: /*#__PURE__*/React.createElement("button", {
+      className: "ghost",
+      onClick: () => db.auth.signOut()
+    }, "Sign out")
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "center"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "spin"
+  }), /*#__PURE__*/React.createElement("p", null, "Loading…")));
+  const isOwner = role === "platform_owner",
+    isAdmin = role === "client_admin";
+  const canManage = isOwner || isAdmin || role === "office";
+  const fillForms = forms.filter(f => f.access_mode === "account" && (isOwner || isAdmin || f.audience === role));
+  const linkForms = forms.filter(f => f.access_mode === "link");
+  if (role === "none") return /*#__PURE__*/React.createElement(Shell, {
+    right: /*#__PURE__*/React.createElement("button", {
+      className: "ghost",
+      onClick: () => db.auth.signOut()
+    }, "Sign out")
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "card narrow"
+  }, /*#__PURE__*/React.createElement("h1", {
+    className: "t"
+  }, "No access yet"), /*#__PURE__*/React.createElement("p", {
+    className: "lead"
+  }, "Your account ", /*#__PURE__*/React.createElement("b", null, session.user.email), " isn't assigned to a role. Ask your administrator to grant access.")));
+  const nav = [fillForms.length && {
+    k: "forms",
+    label: "Fill a form"
+  }, {
+    k: "dash",
+    label: "Dashboard"
+  }, canManage && linkForms.length && {
+    k: "links",
+    label: "Share links"
+  }, (isOwner || isAdmin) && {
+    k: "users",
+    label: "Users"
+  }, isOwner && {
+    k: "clients",
+    label: "Clients"
+  }].filter(Boolean);
+  return /*#__PURE__*/React.createElement(Shell, {
+    right: /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("span", {
+      className: "badge"
+    }, "● ", role.replace("_", " ")), /*#__PURE__*/React.createElement("span", {
+      className: "badge",
+      style: {
+        background: "rgba(255,255,255,.06)",
+        color: "var(--t-on-soft)",
+        borderColor: "var(--ink-line)"
+      }
+    }, session.user.email), /*#__PURE__*/React.createElement("button", {
+      className: "ghost",
+      onClick: () => db.auth.signOut()
+    }, "Sign out"))
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "body"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "nav"
+  }, nav.map(n => /*#__PURE__*/React.createElement("button", {
+    key: n.k,
+    className: view === n.k && !active ? "on" : "",
+    onClick: () => {
+      setView(n.k);
+      setActive(null);
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "dot"
+  }), n.label))), /*#__PURE__*/React.createElement("div", {
+    className: "main"
+  }, active ? /*#__PURE__*/React.createElement(FillForm, {
+    form: active,
+    session: session,
+    clientId: clientId,
+    onDone: () => setActive(null),
+    onBack: () => setActive(null)
+  }) : view === "forms" ? /*#__PURE__*/React.createElement(FormsList, {
+    forms: fillForms,
+    onPick: setActive
+  }) : view === "dash" ? /*#__PURE__*/React.createElement(Dashboard, {
+    forms: forms,
+    role: role
+  }) : view === "links" ? /*#__PURE__*/React.createElement(Links, {
+    forms: linkForms
+  }) : view === "users" ? /*#__PURE__*/React.createElement(UsersView, {
+    role: role
+  }) : view === "clients" ? /*#__PURE__*/React.createElement(Clients, null) : null)));
+}
+function FormsList({
+  forms,
+  onPick
+}) {
+  if (!forms.length) return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h1", {
+    className: "t"
+  }, "Fill a form"), /*#__PURE__*/React.createElement("p", {
+    className: "muted"
+  }, "No forms are assigned to your role."));
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h1", {
+    className: "t"
+  }, "Fill a form"), /*#__PURE__*/React.createElement("p", {
+    className: "lead"
+  }, "Select a form to complete."), /*#__PURE__*/React.createElement("div", {
+    className: "formlist"
+  }, forms.map(f => /*#__PURE__*/React.createElement("button", {
+    className: "formcard",
+    key: f.id,
+    onClick: () => onPick(f)
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "fc-t"
+  }, f.title), /*#__PURE__*/React.createElement("div", {
+    className: "fc-s"
+  }, (f.doc_control || {}).footer_raw || f.code)), /*#__PURE__*/React.createElement("span", {
+    className: "tag"
+  }, f.audience)))));
+}
+function FillForm({
+  form,
+  session,
+  clientId,
+  onDone,
+  onBack
+}) {
+  const [fields, setFields] = useState(null);
+  const [answers, setAnswers] = useState({});
+  const [err, setErr] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [done, setDone] = useState(false);
+  useEffect(() => {
+    (async () => {
+      const {
+        data
+      } = await db.from("form_fields").select("*").eq("form_id", form.id).order("sort_order");
+      setFields(data || []);
+    })();
+  }, [form.id]);
+  async function submit() {
+    setErr("");
+    const v = validate(fields, answers);
+    if (v) return setErr(v);
+    setBusy(true);
+    const {
+      error
+    } = await db.from("submissions").insert({
+      form_id: form.id,
+      client_id: clientId,
+      respondent_user_id: session.user.id,
+      respondent_email: session.user.email,
+      answers
+    });
+    setBusy(false);
+    if (error) {
+      setErr("Could not save: " + error.message);
+      return;
+    }
+    setDone(true);
+  }
+  if (fields === null) return /*#__PURE__*/React.createElement("div", {
+    className: "center"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "spin"
+  }));
+  if (done) return /*#__PURE__*/React.createElement("div", {
+    className: "card narrow",
+    style: {
+      textAlign: "center"
+    }
+  }, /*#__PURE__*/React.createElement("h1", {
+    className: "t"
+  }, "Saved"), /*#__PURE__*/React.createElement("p", {
+    className: "lead"
+  }, "The ", form.title.toLowerCase(), " has been recorded."), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      gap: 12,
+      justifyContent: "center"
+    }
+  }, /*#__PURE__*/React.createElement("button", {
+    className: "sec",
+    onClick: () => {
+      setAnswers({});
+      setDone(false);
+    }
+  }, "Add another"), /*#__PURE__*/React.createElement("button", {
+    className: "linkbtn",
+    onClick: onDone
+  }, "Done")));
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("button", {
+    className: "linkbtn",
+    onClick: onBack
+  }, "← Back to forms"), /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: 10
+    }
+  }), /*#__PURE__*/React.createElement(FormView, {
+    form: form,
+    fields: fields,
+    answers: answers,
+    setAnswers: setAnswers,
+    onSubmit: submit,
+    busy: busy,
+    err: err
+  }));
+}
+
+/* ---------------- dashboard ---------------- */
+function Dashboard({
+  forms,
+  role
+}) {
+  const [formId, setFormId] = useState(forms[0] ? forms[0].id : null);
+  const [fields, setFields] = useState(null);
+  const [subs, setSubs] = useState(null);
+  const [open, setOpen] = useState(null);
+  const form = forms.find(f => f.id === formId);
+  useEffect(() => {
+    if (!formId) return;
+    setFields(null);
+    setSubs(null);
+    (async () => {
+      const {
+        data: ff
+      } = await db.from("form_fields").select("*").eq("form_id", formId).order("sort_order");
+      const {
+        data: ss
+      } = await db.from("submissions").select("*").eq("form_id", formId).order("created_at", {
+        ascending: false
+      });
+      setFields(ff || []);
+      setSubs(ss || []);
+    })();
+  }, [formId]);
+  const stats = useMemo(() => {
+    if (!fields || !subs) return null;
+    const out = [];
+    fields.forEach(f => {
+      const vals = subs.map(s => s.answers && s.answers[f.field_key]).filter(v => v !== undefined && v !== null && v !== "");
+      if (f.field_type === "rating5" || f.field_type === "number") {
+        const nums = vals.map(Number).filter(n => !isNaN(n));
+        if (nums.length) out.push({
+          label: f.label,
+          type: "avg",
+          val: nums.reduce((a, b) => a + b, 0) / nums.length,
+          n: nums.length
+        });
+      } else if (f.field_type === "yesno") {
+        const y = vals.filter(v => v === "yes").length;
+        if (vals.length) out.push({
+          label: f.label,
+          type: "yes",
+          val: Math.round(100 * y / vals.length),
+          n: vals.length
+        });
+      }
+    });
+    return out;
+  }, [fields, subs]);
+  function csv() {
+    if (!fields || !subs) return;
+    const cols = ["created_at", "respondent_email", ...fields.map(f => f.field_key)];
+    const head = ["Submitted", "Email", ...fields.map(f => f.label)];
+    const esc = v => '"' + String(v == null ? "" : v).replace(/"/g, '""') + '"';
+    const rows = [head.map(esc).join(",")];
+    subs.forEach(s => rows.push(cols.map(c => {
+      if (c === "created_at") return esc(s.created_at);
+      if (c === "respondent_email") return esc(s.respondent_email);
+      return esc(s.answers ? s.answers[c] : "");
+    }).join(",")));
+    const u = URL.createObjectURL(new Blob([rows.join("\n")], {
+      type: "text/csv"
+    }));
+    const a = document.createElement("a");
+    a.href = u;
+    a.download = (form.code || "form") + ".csv";
+    a.click();
+    URL.revokeObjectURL(u);
+  }
+  const keyFields = fields ? fields.filter(f => ["text", "date", "select"].includes(f.field_type)).slice(0, 3) : [];
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h1", {
+    className: "t"
+  }, "Dashboard"), /*#__PURE__*/React.createElement("div", {
+    className: "field",
+    style: {
+      maxWidth: 380
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "flabel"
+  }, "Form"), /*#__PURE__*/React.createElement("select", {
+    className: "input",
+    value: formId || "",
+    onChange: e => setFormId(e.target.value)
+  }, forms.map(f => /*#__PURE__*/React.createElement("option", {
+    key: f.id,
+    value: f.id
+  }, f.title)))), fields === null || subs === null ? /*#__PURE__*/React.createElement("div", {
+    className: "center"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "spin"
+  })) : /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement("div", {
+    className: "stats"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "stat"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "l"
+  }, "Responses"), /*#__PURE__*/React.createElement("div", {
+    className: "v"
+  }, subs.length)), stats && stats.filter(s => s.type === "avg").slice(0, 1).map((s, i) => /*#__PURE__*/React.createElement("div", {
+    className: "stat",
+    key: i
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "l"
+  }, "Avg (first rated)"), /*#__PURE__*/React.createElement("div", {
+    className: "v",
+    style: {
+      color: rc(s.val)
+    }
+  }, s.val.toFixed(2)))), /*#__PURE__*/React.createElement("div", {
+    className: "stat"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "l"
+  }, "Last response"), /*#__PURE__*/React.createElement("div", {
+    className: "v",
+    style: {
+      fontSize: 16
+    }
+  }, subs[0] ? new Date(subs[0].created_at).toLocaleDateString() : "—"))), subs.length === 0 ? /*#__PURE__*/React.createElement("div", {
+    className: "panel"
+  }, /*#__PURE__*/React.createElement("p", {
+    className: "muted"
+  }, "No responses yet for this form.")) : /*#__PURE__*/React.createElement(React.Fragment, null, stats && stats.length > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "panel"
+  }, /*#__PURE__*/React.createElement("h2", {
+    className: "t"
+  }, "Question summary"), stats.map((s, i) => /*#__PURE__*/React.createElement("div", {
+    className: "gauge",
+    key: i
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "gh"
+  }, /*#__PURE__*/React.createElement("span", null, s.label), /*#__PURE__*/React.createElement("span", {
+    className: "gv",
+    style: {
+      color: s.type === "avg" ? rc(s.val) : "var(--ink)"
+    }
+  }, s.type === "avg" ? s.val.toFixed(2) : s.val + "% yes")), /*#__PURE__*/React.createElement("div", {
+    className: "track"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "fill",
+    style: {
+      width: (s.type === "avg" ? s.val / 5 * 100 : s.val) + "%",
+      background: s.type === "avg" ? rc(s.val) : "var(--good)"
+    }
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "note"
+  }, s.n, " response", s.n === 1 ? "" : "s")))), /*#__PURE__*/React.createElement("div", {
+    className: "panel"
+  }, /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center"
+    }
+  }, /*#__PURE__*/React.createElement("h2", {
+    className: "t",
+    style: {
+      margin: 0
+    }
+  }, "Responses"), /*#__PURE__*/React.createElement("button", {
+    className: "sec",
+    onClick: csv
+  }, "Export CSV")), /*#__PURE__*/React.createElement("div", {
+    style: {
+      height: 12
+    }
+  }), /*#__PURE__*/React.createElement("div", {
+    className: "tbl"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "trow th",
+    style: {
+      gridTemplateColumns: `1.4fr ${keyFields.map(() => "1fr").join(" ")} .8fr 30px`
+    }
+  }, /*#__PURE__*/React.createElement("span", null, "Email"), keyFields.map(f => /*#__PURE__*/React.createElement("span", {
+    key: f.field_key
+  }, f.label)), /*#__PURE__*/React.createElement("span", null, "Date"), /*#__PURE__*/React.createElement("span", null)), subs.map(s => {
+    const o = open === s.id;
+    return /*#__PURE__*/React.createElement("div", {
+      key: s.id
+    }, /*#__PURE__*/React.createElement("button", {
+      className: "trow td",
+      style: {
+        gridTemplateColumns: `1.4fr ${keyFields.map(() => "1fr").join(" ")} .8fr 30px`
+      },
+      onClick: () => setOpen(o ? null : s.id)
+    }, /*#__PURE__*/React.createElement("span", null, s.respondent_email || "—"), keyFields.map(f => /*#__PURE__*/React.createElement("span", {
+      key: f.field_key
+    }, s.answers && s.answers[f.field_key] || "—")), /*#__PURE__*/React.createElement("span", {
+      className: "muted"
+    }, new Date(s.created_at).toLocaleDateString()), /*#__PURE__*/React.createElement("span", null, o ? "▾" : "▸")), o && /*#__PURE__*/React.createElement("div", {
+      className: "detail"
+    }, fields.map(f => {
+      const v = s.answers ? s.answers[f.field_key] : undefined;
+      return /*#__PURE__*/React.createElement("div", {
+        className: "dr",
+        key: f.field_key
+      }, /*#__PURE__*/React.createElement("span", null, f.label), f.field_type === "rating5" ? /*#__PURE__*/React.createElement("span", {
+        className: "pill",
+        style: {
+          background: rc(Number(v))
+        }
+      }, v ? v + " · " + RW[v] : "—") : /*#__PURE__*/React.createElement("span", {
+        style: {
+          fontWeight: 600
+        }
+      }, v === undefined || v === "" ? "—" : String(v)));
+    })));
+  }))))));
+}
+
+/* ---------------- share links ---------------- */
+function Links({
+  forms
+}) {
+  const [formId, setFormId] = useState(forms[0] ? forms[0].id : null);
+  const [email, setEmail] = useState("");
+  const [link, setLink] = useState("");
+  const [err, setErr] = useState("");
+  const [busy, setBusy] = useState(false);
+  async function gen() {
+    setErr("");
+    setLink("");
+    if (!/^\S+@\S+\.\S+$/.test(email)) return setErr("Enter a valid email.");
+    setBusy(true);
+    const {
+      data: r,
+      error
+    } = await db.rpc("create_invite", {
+      p_form_id: formId,
+      p_email: email.trim(),
+      p_days: 30
+    });
+    setBusy(false);
+    if (error || !r || !r.ok) {
+      setErr("Could not create link: " + (r && r.error || error && error.message || ""));
+      return;
+    }
+    const base = window.location.origin + window.location.pathname;
+    setLink(base + "?t=" + r.token);
+  }
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h1", {
+    className: "t"
+  }, "Share links"), /*#__PURE__*/React.createElement("p", {
+    className: "lead"
+  }, "Generate a one-time link tied to a specific email. It works once, then expires."), /*#__PURE__*/React.createElement("div", {
+    className: "field",
+    style: {
+      maxWidth: 420
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "flabel"
+  }, "Form"), /*#__PURE__*/React.createElement("select", {
+    className: "input",
+    value: formId || "",
+    onChange: e => setFormId(e.target.value)
+  }, forms.map(f => /*#__PURE__*/React.createElement("option", {
+    key: f.id,
+    value: f.id
+  }, f.title)))), /*#__PURE__*/React.createElement("div", {
+    className: "field",
+    style: {
+      maxWidth: 420
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "flabel"
+  }, "Recipient email"), /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    value: email,
+    onChange: e => setEmail(e.target.value),
+    placeholder: "recipient@example.com"
+  })), err && /*#__PURE__*/React.createElement("p", {
+    className: "err"
+  }, "⚠ ", err), /*#__PURE__*/React.createElement("button", {
+    className: "primary",
+    disabled: busy,
+    onClick: gen
+  }, busy ? "Generating…" : "Generate link"), link && /*#__PURE__*/React.createElement("div", {
+    className: "panel",
+    style: {
+      marginTop: 18
+    }
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "ok"
+  }, "Link created for ", email, ". Send it to them."), /*#__PURE__*/React.createElement("div", {
+    className: "copybox"
+  }, /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    readOnly: true,
+    value: link,
+    onFocus: e => e.target.select()
+  }), /*#__PURE__*/React.createElement("button", {
+    className: "sec",
+    onClick: () => navigator.clipboard && navigator.clipboard.writeText(link)
+  }, "Copy")), /*#__PURE__*/React.createElement("div", {
+    className: "note"
+  }, "Only ", email, " can use this link, and only once.")));
+}
+
+/* ---------------- clients (owner) ---------------- */
+function Clients() {
+  const [rows, setRows] = useState(null);
+  useEffect(() => {
+    (async () => {
+      const {
+        data
+      } = await db.from("clients").select("*").order("created_at");
+      setRows(data || []);
+    })();
+  }, []);
+  if (rows === null) return /*#__PURE__*/React.createElement("div", {
+    className: "center"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "spin"
+  }));
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h1", {
+    className: "t"
+  }, "Clients"), /*#__PURE__*/React.createElement("p", {
+    className: "lead"
+  }, "Tenants on the platform. (Adding clients & per-client form sets comes in the next stage.)"), /*#__PURE__*/React.createElement("div", {
+    className: "formlist"
+  }, rows.map(c => /*#__PURE__*/React.createElement("div", {
+    className: "formcard",
+    key: c.id,
+    style: {
+      cursor: "default"
+    }
+  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+    className: "fc-t"
+  }, c.name), /*#__PURE__*/React.createElement("div", {
+    className: "fc-s"
+  }, "slug: ", c.slug)), /*#__PURE__*/React.createElement("span", {
+    className: "tag"
+  }, c.active ? "active" : "inactive")))));
+}
+
+/* ---------------- user management ---------------- */
+function UsersView({
+  role: myRole
+}) {
+  const [profiles, setProfiles] = useState(null);
+  const [pending, setPending] = useState(null);
+  const [clients, setClients] = useState([]);
+  const [email, setEmail] = useState("");
+  const [uRole, setURole] = useState("master");
+  const [clientId, setClientId] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [err, setErr] = useState("");
+  const [msg, setMsg] = useState("");
+  useEffect(() => {
+    load();
+  }, []);
+  async function load() {
+    const {
+      data: p
+    } = await db.from("profiles").select("user_id,full_name,role,client_id,active,created_at").order("created_at", {
+      ascending: false
+    });
+    setProfiles(p || []);
+    const {
+      data: b
+    } = await db.from("bootstrap_access").select("*").order("email");
+    setPending(b || []);
+    if (myRole === "platform_owner") {
+      const {
+        data: c
+      } = await db.from("clients").select("id,name,slug");
+      setClients(c || []);
+      if (c && c.length && !clientId) setClientId(c[0].id);
+    } else {
+      db.rpc("my_client").then(({
+        data: mc
+      }) => {
+        if (mc) setClientId(mc);
+      });
+    }
+  }
+  const isOwner = myRole === "platform_owner";
+  const roleOptions = isOwner ? ["client_admin", "master", "office"] : ["master", "office"];
+  async function addUser() {
+    setErr("");
+    setMsg("");
+    const e = email.trim().toLowerCase();
+    if (!/^\S+@\S+\.\S+$/.test(e)) return setErr("Enter a valid email.");
+    if (!clientId) return setErr("Select a client.");
+    const row = {
+      email: e,
+      role: uRole,
+      client_id: clientId,
+      full_name: fullName.trim() || null
+    };
+    const {
+      error
+    } = await db.from("bootstrap_access").insert(row);
+    if (error) {
+      if (error.message && error.message.includes("duplicate")) return setErr("That email is already added.");
+      return setErr(error.message);
+    }
+    setMsg(e + " added as " + uRole.replace("_", " ") + ". They can now sign in.");
+    setEmail("");
+    setFullName("");
+    load();
+  }
+  async function removeBootstrap(e) {
+    await db.from("bootstrap_access").delete().eq("email", e);
+    load();
+  }
+  async function deactivateProfile(uid, active) {
+    await db.from("profiles").update({
+      active: !active
+    }).eq("user_id", uid);
+    load();
+  }
+  if (profiles === null) return /*#__PURE__*/React.createElement("div", {
+    className: "center"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "spin"
+  }));
+  const activeProfiles = profiles.filter(p => p.role !== "platform_owner" && p.role !== "none");
+  return /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("h1", {
+    className: "t"
+  }, "User Management"), /*#__PURE__*/React.createElement("p", {
+    className: "lead"
+  }, "Add users by email. When they sign in for the first time, they get their assigned role automatically."), /*#__PURE__*/React.createElement("div", {
+    className: "panel"
+  }, /*#__PURE__*/React.createElement("h2", {
+    className: "t"
+  }, "Add new user"), /*#__PURE__*/React.createElement("div", {
+    className: "ugrid"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "field",
+    style: {
+      margin: 0
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "flabel"
+  }, "Email"), /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    value: email,
+    onChange: e => setEmail(e.target.value),
+    placeholder: "user@example.com"
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "field",
+    style: {
+      margin: 0
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "flabel"
+  }, "Name"), /*#__PURE__*/React.createElement("input", {
+    className: "input",
+    value: fullName,
+    onChange: e => setFullName(e.target.value),
+    placeholder: "Full name"
+  })), /*#__PURE__*/React.createElement("div", {
+    className: "field",
+    style: {
+      margin: 0
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "flabel"
+  }, "Role"), /*#__PURE__*/React.createElement("select", {
+    className: "input",
+    value: uRole,
+    onChange: e => setURole(e.target.value)
+  }, roleOptions.map(r => /*#__PURE__*/React.createElement("option", {
+    key: r,
+    value: r
+  }, r.replace("_", " "))))), isOwner && clients.length > 1 && /*#__PURE__*/React.createElement("div", {
+    className: "field",
+    style: {
+      margin: 0
+    }
+  }, /*#__PURE__*/React.createElement("span", {
+    className: "flabel"
+  }, "Client"), /*#__PURE__*/React.createElement("select", {
+    className: "input",
+    value: clientId,
+    onChange: e => setClientId(e.target.value)
+  }, clients.map(c => /*#__PURE__*/React.createElement("option", {
+    key: c.id,
+    value: c.id
+  }, c.name)))), /*#__PURE__*/React.createElement("button", {
+    className: "primary",
+    style: {
+      width: "auto",
+      padding: "11px 20px",
+      alignSelf: "end"
+    },
+    onClick: addUser
+  }, "Add")), err && /*#__PURE__*/React.createElement("p", {
+    className: "err"
+  }, "⚠ ", err), msg && /*#__PURE__*/React.createElement("p", {
+    className: "ok"
+  }, msg)), pending && pending.length > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "panel",
+    style: {
+      marginTop: 16
+    }
+  }, /*#__PURE__*/React.createElement("h2", {
+    className: "t"
+  }, "Pending sign-in (", pending.length, ")"), /*#__PURE__*/React.createElement("p", {
+    className: "muted",
+    style: {
+      marginBottom: 12
+    }
+  }, "Added but haven't signed in yet. Role activates on first login."), /*#__PURE__*/React.createElement("div", {
+    className: "tbl"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "trow th",
+    style: {
+      gridTemplateColumns: "2fr 1fr 1fr auto"
+    }
+  }, /*#__PURE__*/React.createElement("span", null, "Email"), /*#__PURE__*/React.createElement("span", null, "Role"), /*#__PURE__*/React.createElement("span", null, "Name"), /*#__PURE__*/React.createElement("span", null)), pending.map(b => /*#__PURE__*/React.createElement("div", {
+    key: b.email,
+    className: "trow td",
+    style: {
+      gridTemplateColumns: "2fr 1fr 1fr auto",
+      cursor: "default"
+    }
+  }, /*#__PURE__*/React.createElement("span", null, b.email), /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement("span", {
+    className: "tag"
+  }, b.role.replace("_", " "))), /*#__PURE__*/React.createElement("span", {
+    className: "muted"
+  }, b.full_name || "—"), /*#__PURE__*/React.createElement("button", {
+    className: "linkbtn",
+    onClick: () => removeBootstrap(b.email)
+  }, "Remove"))))), activeProfiles.length > 0 && /*#__PURE__*/React.createElement("div", {
+    className: "panel",
+    style: {
+      marginTop: 16
+    }
+  }, /*#__PURE__*/React.createElement("h2", {
+    className: "t"
+  }, "Active users (", activeProfiles.length, ")"), /*#__PURE__*/React.createElement("div", {
+    className: "tbl"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "trow th",
+    style: {
+      gridTemplateColumns: "2fr 1fr 1fr auto"
+    }
+  }, /*#__PURE__*/React.createElement("span", null, "Name"), /*#__PURE__*/React.createElement("span", null, "Role"), /*#__PURE__*/React.createElement("span", null, "Status"), /*#__PURE__*/React.createElement("span", null)), activeProfiles.map(p => /*#__PURE__*/React.createElement("div", {
+    key: p.user_id,
+    className: "trow td",
+    style: {
+      gridTemplateColumns: "2fr 1fr 1fr auto",
+      cursor: "default"
+    }
+  }, /*#__PURE__*/React.createElement("span", null, p.full_name || "(no name)"), /*#__PURE__*/React.createElement("span", null, /*#__PURE__*/React.createElement("span", {
+    className: "tag"
+  }, p.role.replace("_", " "))), /*#__PURE__*/React.createElement("span", null, p.active ? /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "var(--good)"
+    }
+  }, "Active") : /*#__PURE__*/React.createElement("span", {
+    style: {
+      color: "var(--bad)"
+    }
+  }, "Inactive")), /*#__PURE__*/React.createElement("button", {
+    className: "linkbtn",
+    onClick: () => deactivateProfile(p.user_id, p.active)
+  }, p.active ? "Deactivate" : "Reactivate"))))));
+}
+
+/* ---------------- root ---------------- */
+function Root() {
+  const [session, setSession] = useState(undefined);
+  const token = new URLSearchParams(window.location.search).get("t");
+  useEffect(() => {
+    if (token) return;
+    db.auth.getSession().then(({
+      data
+    }) => setSession(data.session));
+    const {
+      data: sub
+    } = db.auth.onAuthStateChange((_e, s) => setSession(s));
+    return () => sub.subscription.unsubscribe();
+  }, []);
+  if (token) return /*#__PURE__*/React.createElement(PublicFlow, {
+    token: token
+  });
+  if (session === undefined) return /*#__PURE__*/React.createElement(Shell, null, /*#__PURE__*/React.createElement("div", {
+    className: "center"
+  }, /*#__PURE__*/React.createElement("div", {
+    className: "spin"
+  }), /*#__PURE__*/React.createElement("p", null, "Loading…")));
+  if (!session) return /*#__PURE__*/React.createElement(Login, null);
+  return /*#__PURE__*/React.createElement(AppInner, {
+    session: session
+  });
+}
+ReactDOM.createRoot(document.getElementById("root")).render(/*#__PURE__*/React.createElement(Root, null));
+</script>
+</body>
+</html>
